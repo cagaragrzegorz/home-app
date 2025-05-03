@@ -1,0 +1,37 @@
+meta {
+  name: Meteo um4_60
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://devmgramapi.meteo.pl/meteorograms/um4_60
+  body: json
+  auth: inherit
+}
+
+headers {
+  Accept: application/json, text/plain, */*
+  Accept-Language: en-US,en;q=0.9,pl;q=0.8
+  Connection: keep-alive
+  Content-Type: application/json
+  Origin: https://www.meteo.pl
+  Referer: https://www.meteo.pl/
+  Sec-Fetch-Dest: empty
+  Sec-Fetch-Mode: cors
+  Sec-Fetch-Site: same-site
+  User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+  sec-ch-ua: "Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "macOS"
+}
+
+body:json {
+  {
+    "date": 1745776800,
+    "point": {
+      "lat": "50.04507",
+      "lon": "19.99766"
+    }
+  }
+}

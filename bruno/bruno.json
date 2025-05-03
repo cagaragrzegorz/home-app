@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "home_tablet_application",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

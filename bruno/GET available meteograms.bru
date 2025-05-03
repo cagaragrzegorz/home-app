@@ -1,0 +1,21 @@
+meta {
+  name: GET available meteograms
+  type: http
+  seq: 4
+}
+
+get {
+  url: https://devmgramapi.meteo.pl/meteorograms/available
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json, text/plain, */*
+}
+
+script:post-response {
+  const resBody = res.getBody()
+  
+  bru.setVar("latestMeteogram", Math.max(...resBody.um4_60))
+}
