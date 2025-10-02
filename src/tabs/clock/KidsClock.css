@@ -3,20 +3,13 @@
 
 /* --- Optional Wrapper --- */
 .kids-clock-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /*padding: 20px;*/
-    /*!*margin: 0;*!*/
-    /*margin: auto;*/
-    /*position: absolute;*/
-    /*top: 25%;*/
-    /* background-color: #f0f8ff; /* Example: Very light blue background */
-    /*margin: 0;*/
-    /*position: absolute;*/
-    /*top: 50%;*/
-    /*left: 50%;*/
-    /*transform: translate(-50%, -50%);*/
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 555px;
+
 }
 
 /* --- Clock Styling --- */

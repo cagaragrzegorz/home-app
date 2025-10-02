@@ -89,7 +89,7 @@
 }
 
 .large-text {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: #ffffff;
 }
@@ -223,4 +223,8 @@
     padding: 1px 4px;
     margin-left: 4px;
     border-radius: 3px;
+}
+
+.tab-content {
+    padding-top: 10px !important;
 }

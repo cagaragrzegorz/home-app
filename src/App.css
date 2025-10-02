@@ -1,6 +1,6 @@
 body {
   height: 100vh;
-  background-color: #7294a2 !important;
+  background-color: #949aa7 !important;
 }
 
 .app {
@@ -14,7 +14,7 @@ body {
 }
 .nav-link {
   color: white !important;
-  background-color: #669eec !important;
+  /*background-color: #669eec !important;*/
   border-radius: var(--bs-nav-pills-border-radius);
 }
 
