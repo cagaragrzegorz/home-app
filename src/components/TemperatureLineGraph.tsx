@@ -27,7 +27,6 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
     const date = new Date(baseDate.getTime());
     date.setHours(date.getHours() + idx + firstHour + 3);
     const day = (date.getDate()-1).toString().padStart(2, "0");
-    console.log(date.getDate());
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const hour = date.getHours().toString().padStart(2, "0");
     return {
@@ -41,24 +40,24 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
     labels: labels.map(l => l.full),
     datasets: [
       {
-        label: "Temperature (°C)",
+        label: "Temperatura (°C)",
         data,
         fill: false,
-        borderColor: "rgba(75,192,192,1)",
+        borderColor: "#feff00",
         tension: 0.2,
       },
       {
-        label: "Max Temperature (°C)",
+        label: "Max Temperatura (°C)",
         data: data_max ? data_max : [],
         fill: false,
-        borderColor: "green",
+        borderColor: "#335e33",
         tension: 0.2,
       },
       {
-        label: "Min Temperature (°C)",
+        label: "Min Temperatura (°C)",
         data: data_min ? data_min : [],
         fill: false,
-        borderColor: "yellow",
+        borderColor: "#4b7a7a",
         tension: 0.2,
       },
     ],
@@ -67,7 +66,7 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
   const options = {
     responsive: true,
     plugins: {
-      legend: { display: true },
+      legend: { display: true, labels: {color: "white"} },
       tooltip: { mode: 'index' as const, intersect: false },
     },
     scales: {
@@ -91,43 +90,34 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
     },
   };
 
-  return <Line data={chartData} options={options} />;
+
+  const verticalLinePlugin = {
+    id: 'verticalLinePlugin',
+    afterDraw: (chart: any) => {
+      const ctx = chart.ctx;
+      const xAxis = chart.scales.x;
+      const yAxis = chart.scales.y;
+
+      chart.data.labels.forEach((label: string, index: number) => {
+        if (label.includes('00:00')) {
+          const x = xAxis.getPixelForTick(index);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, yAxis.top);
+          ctx.lineTo(x, yAxis.bottom);
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 1;
+          // ctx.setLineDash([5, 5]); // optional: dashed line
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+    },
+  };
+
+
+  //@ts-ignore
+  return <Line data={chartData} options={options} plugins={[verticalLinePlugin]}/>;
 };
 
 export default TemperatureLineGraph;
-
-
-// import React from "react";
-// import { Line } from "react-chartjs-2";
-// import { Chart, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from "chart.js";
-//
-// Chart.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
-//
-// interface TemperatureLineGraphProps {
-//   data: number[];
-//   firstHour: number;
-// }
-//
-// const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, firstHour }) => {
-//   const labels = data.map((_, idx) => {
-//     const hour = (firstHour + idx) % 24;
-//     return `${hour < 10 ? "0" : ""}${hour}:00`;
-//   });
-//
-//   const chartData = {
-//     labels,
-//     datasets: [
-//       {
-//         label: "Temperature (°C)",
-//         data,
-//         fill: false,
-//         borderColor: "rgba(75,192,192,1)",
-//         tension: 0.2,
-//       },
-//     ],
-//   };
-//
-//   return <Line data={chartData} />;
-// };
-//
-// export default TemperatureLineGraph;

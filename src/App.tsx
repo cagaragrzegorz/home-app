@@ -1,11 +1,12 @@
 import "./App.css";
 import React, {FC} from "react";
 import {Col, Container, Tab, Tabs} from "react-bootstrap";
-import DashboardMock from "./tabs/dashboard/Dashboard";
-import {AlarmClock, BrushCleaning, ChevronDown, CloudSun, House, Star, ThermometerSun} from "lucide-react";
+import {AlarmClock, BrushCleaning, House, Sparkles, ThermometerSun} from "lucide-react";
 import Dashboard from "./tabs/dashboard/Dashboard";
 import {Home} from "./tabs/home/Home";
-
+import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
+import {DutyTable} from "./tabs/dutyTable/DutyTable";
+import FireworksWithRocketsSidekickVersion from "./tabs/fireworks/FireworksWithRocketsSidekickVersion";
 
 export const App: FC = () => (
     <div className="app">
@@ -15,7 +16,6 @@ export const App: FC = () => (
                       defaultActiveKey="home"
                       justify
                   >
-
                       <Tab eventKey="home" title={<House color="white"/> }>
                           <Home/>
                       </Tab>
@@ -23,14 +23,14 @@ export const App: FC = () => (
                           <Dashboard/>
                       </Tab>
                       <Tab eventKey="morning" title={<AlarmClock color="white"/> }>
-                          Tab content for morning routine
+                          <MorningRoutine />
                       </Tab>
                       <Tab eventKey="duties" title={<BrushCleaning color="white"/> }>
-                          Tab content for duties
+                          <DutyTable />
                       </Tab>
-                      {/*<Tab eventKey="effects" title="Effects">*/}
-                      {/*    Tab content for effects*/}
-                      {/*</Tab>*/}
+                      <Tab eventKey="fireworks" title={<Sparkles color="white"/> }>
+                          <FireworksWithRocketsSidekickVersion />
+                      </Tab>
                   </Tabs>
               </Col>
       </Container>

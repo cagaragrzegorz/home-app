@@ -51,14 +51,7 @@ const KidsClock: React.FC = () => {
                 </div>
                 <div className="kids-clock-row-lower">
                     <span className="kids-clock-segment">{day}-{month}-{year} - {daysOfWeek[dayOfWeek].toUpperCase()}</span>
-                    {/*<span className="kids-clock-separator">-</span>*/}
-                    {/*<span className="kids-clock-segment">{month}</span>*/}
-                    {/*<span className="kids-clock-separator">-</span>*/}
-                    {/*<span className="kids-clock-segment">{year}</span>*/}
                 </div>
-                {/*<div className="kids-clock-row-lower">*/}
-                {/*    <span className="kids-clock-segment">{daysOfWeek[dayOfWeek]}</span>*/}
-                {/*</div>*/}
             </div>
         </div>
                 );

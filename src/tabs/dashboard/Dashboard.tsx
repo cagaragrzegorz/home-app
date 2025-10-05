@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './Dashboard.css';
-import KidsClock from "../clock/KidsClock";
 import {ApiError} from "./types";
 import axios, {AxiosError, AxiosResponse} from "axios";
 import {fetchAvailableMeteograms, postUM460Meteograms} from "../../api/meteoClient";
@@ -66,19 +65,6 @@ const Dashboard: React.FC = () => {
         };
     }, [fetchData]);
 
-    // data.airtmp_max temperatura max - DONE
-    // data.airtmp_min temperatura min- DONE
-    // data.airtmp_point temperatura - DONE
-    // data.trpres_point cisnienie atmosferyczne - DONE
-    // data.slpres_point cisnienie atmosferyczne zredukowane - DONE
-    // data.realhum_aver wilgotnosc wzgledna - DONE
-    // data.wind10_sd_true_prev_point predkosc wiatru - DONE
-    // data.wind_gust_max poryw wiatru - DONE
-    // data.pcpttlprob_point prawdopodowienstwo deszczu - DONE
-    // data.pcpttl_aver sredni deszcz - DONE
-    // data.pcpttl_max max deszcz - DONE
-
-
     // @ts-ignore
     return (
         <div className="dashboard-container">
@@ -96,7 +82,6 @@ const Dashboard: React.FC = () => {
                 <div className="info-card">
                     {data && (
                         <div style={{ background: "#222", padding: 16, borderRadius: 8, marginBottom: 24 }}>
-                            <h5 style={{ color: "#fff" }}>Temperature Line Graph</h5>
                             <TemperatureLineGraph data={data.airtmp_point.data}
                                                   data_max={data.airtmp_max.data}
                                                   data_min={data.airtmp_min.data}
