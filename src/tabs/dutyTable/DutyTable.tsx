@@ -14,9 +14,9 @@ type DutiesByDay = {
 
 const duties: DutiesByDay = {
   Poniedziałek: {
-    Tosia: ['Wash dishes', 'Fold laundry'],
-    Mania: ['Take out trash'],
-    Ola: ['Feed the dog', 'Clean room'],
+    Tosia: ['Rozpakować zmywarkę'],
+    Mania: ['Wynieść śmieci'],
+    Ola: ['Posprzątać stół'],
   },
   Wtorek: {
     Tosia: ['Vacuum'],
