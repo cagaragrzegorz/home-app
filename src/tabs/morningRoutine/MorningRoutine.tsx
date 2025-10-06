@@ -32,9 +32,9 @@ export const MorningRoutine: React.FC = () => {
     const [isRoutineActive, setIsRoutineActive] = useState(false);
     const [isAfterRoutine, setIsAfterRoutine] = useState(false);
     const routineStartTime= {
-        hour: 20,
-        minute: 0,
-        second: 20,
+        hour: 6,
+        minute: 30,
+        second: 0,
     };
     const [isStageTimeCalculated, setIsStageTimeCalculated] = useState(false);
     const [timeLeft, setTimeLeft] = useState("00:00:00");
