@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import {BrushCleaning, Volume2, VolumeOff} from "lucide-react";
+import React, {CSSProperties, useEffect, useState} from 'react';
+import {Volume2, VolumeOff} from "lucide-react";
+import notificationSound from '../../assets/sounds/notification.mp3';
 
 type Stage = {
     name: string;
@@ -33,7 +34,7 @@ export const MorningRoutine: React.FC = () => {
     const [isAfterRoutine, setIsAfterRoutine] = useState(false);
     const routineStartTime= {
         hour: 6,
-        minute: 30,
+        minute: 20,
         second: 0,
     };
     const [isStageTimeCalculated, setIsStageTimeCalculated] = useState(false);
@@ -45,7 +46,7 @@ export const MorningRoutine: React.FC = () => {
     const [buttonColor, setButtonColor] = useState<string>('#e1a1a1');
     const [audioMuted, setAudioMuted] = useState<boolean>(true);
     const [audio] = useState(() => {
-        const audioElement = new Audio('./sounds/stage-change.mp3');
+        const audioElement = new Audio(notificationSound);
         audioElement.controls = true;
         return audioElement;
     });
@@ -93,6 +94,7 @@ export const MorningRoutine: React.FC = () => {
                     const currentDuration = prev + 1;
                     if (currentDuration >= stages[currentStageIndex].durationInSeconds) {
                         setCurrentStageIndex((prevIndex) => prevIndex + 1);
+                        if (!audioMuted) audio.play()
                         return 0;
                     }
                     return currentDuration;
@@ -125,8 +127,6 @@ export const MorningRoutine: React.FC = () => {
         }
     }, [isRoutineActive]);
 
-    const formatTime = (date: Date) =>
-        date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     const getRemainingTime = (duration: number, elapsed: number) => {
         const remaining = duration - elapsed;
@@ -147,95 +147,122 @@ export const MorningRoutine: React.FC = () => {
         }
     };
 
+    const overlayStyle: CSSProperties = {
+        position: "absolute",
+        inset: "0px",
+        backgroundColor: "rgb(136 136 136 / 59%)",
+        zIndex: "10",
+        borderRadius: "8px",
+        fontWeight: "600",
+        fontSize: "2.5rem",
+        fontFamily: "monospace"
+    }
+
     return (
-        <div style={{ padding: '0rem', fontFamily: 'Arial, sans-serif' }}>
-            {isBeforeRoutine &&
-            <div className="kids-clock-wrapper" style={{color: "white", fontWeight: "500"}}>
-                <div style={{fontSize: "2rem", fontFamily: "monospace"}}>Rutyna rozpocznie się za:</div>
-                <div style={{fontSize: "2rem", fontFamily: "monospace"}}>{timeLeft}</div>
-            </div>}
+        <div style={{fontFamily: 'Arial, sans-serif'}}>
+                <div style={{marginBottom: "10px"}}>
+                    <button
+                        type="button"
+                        onClick={toggleSoundMute}
+                        style={{
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            backgroundColor: buttonColor,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {audioMuted ? <VolumeOff color="white"/> : <Volume2 color="white"/>}
+                    </button>
+                </div>
 
-            {isAfterRoutine &&
-                <div className="kids-clock-wrapper" style={{color: "white", fontWeight: "500"}}>
-                    <div style={{fontSize: "2rem", fontFamily: "monospace"}}>Jest już po rutynie:</div>
-                    <div style={{fontSize: "2rem", fontFamily: "monospace"}}>{timeLeft}</div>
-                </div>}
-            {/*<div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>*/}
-            {/*    /!*🕒 Obecny czas: {formatTime(currentTime)}*!/*/}
-            {/*    /!*<div style={{ float: 'right' }}>*!/*/}
-            {/*    /!*    <button*!/*/}
-            {/*    /!*        type="button"*!/*/}
-            {/*    /!*        onClick={toggleSoundMute}*!/*/}
-            {/*    /!*        style={{*!/*/}
-            {/*    /!*            padding: '10px 20px',*!/*/}
-            {/*    /!*            fontSize: '16px',*!/*/}
-            {/*    /!*            backgroundColor: buttonColor,*!/*/}
-            {/*    /!*            color: 'white',*!/*/}
-            {/*    /!*            border: 'none',*!/*/}
-            {/*    /!*            borderRadius: '5px',*!/*/}
-            {/*    /!*            cursor: 'pointer',*!/*/}
-            {/*    /!*        }}*!/*/}
-            {/*    /!*    >*!/*/}
-            {/*    /!*        {audioMuted ? <VolumeOff color="white"/>  : <Volume2 color="white"/> }*!/*/}
-            {/*    /!*    </button>*!/*/}
-            {/*    /!*</div>*!/*/}
-            {/*</div>*/}
-            {isRoutineActive &&
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-                {stages.map((stage, index) => {
-                    const isActive = index === currentStageIndex;
-                    let progress = 0;
-
-                    if (isActive && stage.durationInSeconds > 0) {
-                        progress = Math.min(((elapsedTime + 1) / stage.durationInSeconds) * 100, 100);
-                    } else if (index < currentStageIndex) {
-                        progress = 100;
-                    } else {
-                        progress = 0;
-                    }
-
-                    return (
-                        <li
-                            key={index}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                marginBottom: '1rem',
-                                backgroundColor: isActive ? '#4caf50' : '#e0e0e0',
-                                color: isActive ? '#fff' : '#000',
-                                fontWeight: isActive ? 'bold' : 'normal',
-                                borderRadius: '8px',
-                                transition: 'background-color 0.5s ease',
-                                boxShadow: isActive ? '0 0 10px rgba(0,0,0,0.3)' : 'none',
-                            }}
-                        >
-                            <div style={{ fontSize: '1.2rem', marginBottom: '0.5rem', textAlign: 'left' }}>{stage.name}
-                            {isActive && (
-                                <div style={{ marginBottom: '0.5rem', textAlign: 'end', float: 'right' }}>
-                                    Pozostało: {getRemainingTime(stage.durationInSeconds, elapsedTime)}
-                                </div>
-                            )}
+                <div className="position-relative">
+                    {isBeforeRoutine &&
+                        <div className="text-white p-3" style={overlayStyle}>
+                            <div style={{
+                                height: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}>
+                                Rutyna rozpocznie się za
+                                <br/>
+                                {timeLeft}
                             </div>
-                            <div
+                        </div>}
+
+                    {isAfterRoutine &&
+                        <div className="text-white p-3" style={overlayStyle}>
+                            <div style={{
+                                height: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}>
+                                Jest już po rutynie:
+                            <br/>
+                                {timeLeft}
+                            </div>
+                        </div>}
+                <ul style={{listStyleType: 'none', padding: 0}}>
+                    {stages.map((stage, index) => {
+                        const isActive = index === currentStageIndex;
+                        let progress = 0;
+
+                        if (isActive && stage.durationInSeconds > 0) {
+                            progress = Math.min(((elapsedTime + 1) / stage.durationInSeconds) * 100, 100);
+                        } else if (index < currentStageIndex) {
+                            progress = 100;
+                        } else {
+                            progress = 0;
+                        }
+
+                        return (
+                            <li
+                                key={index}
                                 style={{
-                                    height: '10px',
-                                    backgroundColor: '#ccc',
-                                    borderRadius: '5px',
-                                    overflow: 'hidden',
+                                    padding: '0.5rem 1rem',
+                                    marginBottom: '1rem',
+                                    backgroundColor: isActive ? '#4caf50' : '#e0e0e0',
+                                    color: isActive ? '#fff' : '#000',
+                                    fontWeight: isActive ? 'bold' : 'normal',
+                                    borderRadius: '8px',
+                                    transition: 'background-color 0.5s ease',
+                                    boxShadow: isActive ? '0 0 10px rgba(0,0,0,0.3)' : 'none',
                                 }}
                             >
                                 <div
+                                    style={{fontSize: '1.2rem', marginBottom: '0.5rem', textAlign: 'left'}}>{stage.name}
+                                    {isActive && (
+                                        <div style={{marginBottom: '0.5rem', textAlign: 'end', float: 'right'}}>
+                                            Pozostało: {getRemainingTime(stage.durationInSeconds, elapsedTime)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div
                                     style={{
-                                        width: `${progress}%`,
-                                        height: '100%',
-                                        backgroundColor: isActive ? '#fff' : '#888',
-                                        transition: 'width 1s linear',
+                                        height: '10px',
+                                        backgroundColor: '#ccc',
+                                        borderRadius: '5px',
+                                        overflow: 'hidden',
                                     }}
-                                />
-                            </div>
-                        </li>
-                    );
-                })}
-            </ul>}
+                                >
+                                    <div
+                                        style={{
+                                            width: `${progress}%`,
+                                            height: '100%',
+                                            backgroundColor: isActive ? '#fff' : '#888',
+                                            transition: 'width 1s linear',
+                                        }}
+                                    />
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
         </div>
     );
 };
