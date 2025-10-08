@@ -7,24 +7,24 @@ type Stage = {
     durationInSeconds: number;
 };
 
-// const stages: Stage[] = [
-//     { name: '⏰ 🥱 Wstawanie - 15 minut', durationInSeconds: 15*60 },
-//     { name: '👚 👗 Ubieranie się - 10 minut', durationInSeconds: 10*60 },
-//     { name: '🍽️ 🥣 Śniadanie - 20 minut', durationInSeconds: 20*60 },
-//     { name: '📏 🪥🦷 Czesanie i mycie zębów - 5 minut', durationInSeconds: 5*60 },
-//     { name: '👟 🧥 Ubieranie butów i kurtek - 5 minut', durationInSeconds: 5*60 },
-//     { name: '🚶🏻 🚗💨 Wychodzenie z mieszkania - 5 minut', durationInSeconds: 5*60 },
-// ];
-
 const stages: Stage[] = [
-    { name: '⏰ 🥱 Wstawanie - 5 minut', durationInSeconds: 5*60 },
-    { name: '🛁 🧴 Prysznic - 15 minut', durationInSeconds: 15*60 },
-    { name: '👚 👗 Ubieranie się - 5 minut', durationInSeconds: 5*60 },
+    { name: '⏰ 🥱 Wstawanie - 15 minut', durationInSeconds: 15*60 },
+    { name: '👚 👗 Ubieranie się - 10 minut', durationInSeconds: 10*60 },
     { name: '🍽️ 🥣 Śniadanie - 20 minut', durationInSeconds: 20*60 },
     { name: '📏 🪥🦷 Czesanie i mycie zębów - 5 minut', durationInSeconds: 5*60 },
     { name: '👟 🧥 Ubieranie butów i kurtek - 5 minut', durationInSeconds: 5*60 },
     { name: '🚶🏻 🚗💨 Wychodzenie z mieszkania - 5 minut', durationInSeconds: 5*60 },
 ];
+
+// const stages: Stage[] = [
+//     { name: '⏰ 🥱 Wstawanie - 5 minut', durationInSeconds: 5*60 },
+//     { name: '🛁 🧴 Prysznic - 15 minut', durationInSeconds: 15*60 },
+//     { name: '👚 👗 Ubieranie się - 5 minut', durationInSeconds: 5*60 },
+//     { name: '🍽️ 🥣 Śniadanie - 20 minut', durationInSeconds: 20*60 },
+//     { name: '📏 🪥🦷 Czesanie i mycie zębów - 5 minut', durationInSeconds: 5*60 },
+//     { name: '👟 🧥 Ubieranie butów i kurtek - 5 minut', durationInSeconds: 5*60 },
+//     { name: '🚶🏻 🚗💨 Wychodzenie z mieszkania - 5 minut', durationInSeconds: 5*60 },
+// ];
 export const MorningRoutine: React.FC = () => {
     // morning routine stages
     const [currentStageIndex, setCurrentStageIndex] = useState(9);
@@ -34,7 +34,7 @@ export const MorningRoutine: React.FC = () => {
     const [isAfterRoutine, setIsAfterRoutine] = useState(false);
     const routineStartTime= {
         hour: 6,
-        minute: 20,
+        minute: 30,
         second: 0,
     };
     const [isStageTimeCalculated, setIsStageTimeCalculated] = useState(false);
@@ -76,7 +76,7 @@ export const MorningRoutine: React.FC = () => {
 
             if (remaining > 0 ) {
                 setIsBeforeRoutine(true);
-            } else if(remaining <= 0 && (remaining*(-1) <= (totalStageTime+1) * 1000)){
+            } else if(remaining <= 0 && (remaining*(-1) <= (totalStageTime+2) * 1000)){
                 setIsBeforeRoutine(false);
                 setIsRoutineActive(true);
                 setTimeLeft("00:00:00");
