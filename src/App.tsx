@@ -6,7 +6,6 @@ import Dashboard from "./tabs/dashboard/Dashboard";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
-import FireworksWithRocketsSidekickVersion from "./tabs/fireworks/FireworksWithRocketsSidekickVersion";
 
 export const App: FC = () => (
     <div className="app">
@@ -28,9 +27,9 @@ export const App: FC = () => (
                       <Tab eventKey="duties" title={<BrushCleaning color="white"/> }>
                           <DutyTable />
                       </Tab>
-                      <Tab eventKey="fireworks" title={<Sparkles color="white"/> }>
-                          <FireworksWithRocketsSidekickVersion />
-                      </Tab>
+                      {/*<Tab eventKey="fireworks" title={<Sparkles color="white"/> }>*/}
+                      {/*    <FireworksWithRocketsSidekickVersion />*/}
+                      {/*</Tab>*/}
                   </Tabs>
               </Col>
       </Container>
