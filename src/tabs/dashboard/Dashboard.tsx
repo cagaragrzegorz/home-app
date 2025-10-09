@@ -25,9 +25,16 @@ const Dashboard: React.FC = () => {
         try {
             const meteogramResponse: AvailableMeteorgams = await fetchAvailableMeteograms();
             const latestMeteogram: number = Math.max(...meteogramResponse.um4_60)
-            const dataResponse = await postUM460Meteograms(latestMeteogram)
+            let dataResponse = await postUM460Meteograms(latestMeteogram)
+            const startDateTime = new Date(+dataResponse.data.airtmp_point.first_timestamp * 1000)
+            const indexToShiftLocal = Math.floor(Math.abs(startDateTime.getTime() - new Date().getTime()) / 3600000);
+            const newStartDateTime = new Date(startDateTime.getTime())
+            newStartDateTime.setHours(newStartDateTime.getHours() + indexToShiftLocal)
+            setFirstHour(newStartDateTime.getHours())
+            for (const key in dataResponse.data) {
+                dataResponse.data[key].data = dataResponse.data[key].data.slice(indexToShiftLocal, dataResponse.data[key].data.length)
+            }
             setData(dataResponse.data);
-            setFirstHour(new Date(+dataResponse.data.airtmp_point.first_timestamp * 1000).getHours())
         } catch (err) {
             console.error('Error fetching data:', err);
             let errorMessage = 'An unknown error occurred';
@@ -86,10 +93,10 @@ const Dashboard: React.FC = () => {
                                                   data_max={data.airtmp_max.data}
                                                   data_min={data.airtmp_min.data}
                                                   firstHour={firstHour}
-                                                  startDate={new Date(+data.airtmp_point.first_timestamp * 1000).toISOString()}/>
+                                                  startDate={new Date(new Date(+data.airtmp_point.first_timestamp * 1000).setHours(firstHour)).toISOString()}/>
                         </div>
                     )}
-                    <div className="card-title">Temperatura (°C) {firstHour}</div>
+                    <div className="card-title">Temperatura (°C)</div>
                     <div className="metric-container">
                         <div className="metric-item" style={{paddingLeft: '10px'}}>
                             <div className="data-section">
@@ -110,7 +117,7 @@ const Dashboard: React.FC = () => {
                                     <div className="small-text">{data.airtmp_min.data[index].toFixed(1)}</div>
                                 </div>
                                 <div
-                                    className="label-hour">{(firstHour + index) % 24 < 10 ? '0' : ''}{(firstHour + index) % 24}:00
+                                    className="label-hour">{((firstHour + index) % 24).toString().padStart(2, "0")}:00
                                 </div>
                                 <div className="axis-mark"></div>
                             </div>
@@ -137,7 +144,7 @@ const Dashboard: React.FC = () => {
                                     <div className="large-text">{data.pcpttlprob_point.data[index].toFixed(0)}</div>
                                 </div>
                                 <div
-                                    className="label-hour">{(firstHour + index) % 24 < 10 ? '0' : ''}{(firstHour + index) % 24}:00
+                                    className="label-hour">{((firstHour + index) % 24).toString().padStart(2, "0")}:00
                                 </div>
                                 <div className="axis-mark"></div>
                             </div>
@@ -165,7 +172,7 @@ const Dashboard: React.FC = () => {
                                                 className="small-text">{(data.slpres_point.data[index] / 100).toFixed(0)}</div>
                                         </div>
                                         <div
-                                            className="label-hour">{(firstHour + index) % 24 < 10 ? '0' : ''}{(firstHour + index) % 24}:00
+                                            className="label-hour">{((firstHour + index) % 24).toString().padStart(2, "0")}:00
                                         </div>
                                         <div className="axis-mark"></div>
                                     </div>
@@ -188,7 +195,7 @@ const Dashboard: React.FC = () => {
                                             <div className="large-text">{(item).toFixed(0)}</div>
                                         </div>
                                         <div
-                                            className="label-hour">{(firstHour + index) % 24 < 10 ? '0' : ''}{(firstHour + index) % 24}:00
+                                            className="label-hour">{((firstHour + index) % 24).toString().padStart(2, "0")}:00
                                         </div>
                                         <div className="axis-mark"></div>
                                     </div>
@@ -214,7 +221,7 @@ const Dashboard: React.FC = () => {
                                             <div className="large-text">{(item * 36 / 10).toFixed(0)}</div>
                                         </div>
                                         <div
-                                            className="label-hour">{(firstHour + index) % 24 < 10 ? '0' : ''}{(firstHour + index) % 24}:00
+                                            className="label-hour">{((firstHour + index) % 24).toString().padStart(2, "0")}:00
                                         </div>
                                         <div className="axis-mark"></div>
                                     </div>

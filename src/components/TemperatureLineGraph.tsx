@@ -14,12 +14,15 @@ interface TemperatureLineGraphProps {
 
 const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_min, data_max, firstHour, startDate }) => {
   const baseDate = new Date(startDate);
-  const currentHour = new Date().getHours();
 
+  data = data.slice(0, 30);
+  data_min = data_min.slice(0, 30);
+  data_max = data_max.slice(0, 30);
+  console.log(firstHour)
   // Prepare labels for each data point
   let labels = data.map((_, index) => {
     const date = new Date(baseDate.getTime());
-    date.setHours(date.getHours() + index + firstHour + 3);
+    date.setHours(firstHour + index);
     const day = (date.getDate()-1).toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const hour = date.getHours().toString().padStart(2, "0");
@@ -30,18 +33,6 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
     };
   });
 
-  const labelIndex = labels.findIndex((label) => label.hour === `${currentHour.toString().padStart(2, "0")}:00`);
-  labels = labels.slice(labelIndex-1, labelIndex + 29);
-  data_min = data_min.slice(labelIndex-1, labelIndex + 29);
-  data_max = data_max.slice(labelIndex-1, labelIndex + 29);
-
-  if (data.length > labelIndex + 29) {
-    data = data.slice(labelIndex-1, labelIndex + 29);
-  } else if (data.length < labelIndex + 29) {
-    data = data.slice(labelIndex-1, data.length-1);
-    const missingPoints = Array(30 - data.length).fill(null);
-    data = [...data, ...missingPoints];
-  }
 
   const chartData = {
     labels: labels.map(l => l.full),
