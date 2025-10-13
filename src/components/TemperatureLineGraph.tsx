@@ -18,7 +18,7 @@ const TemperatureLineGraph: React.FC<TemperatureLineGraphProps> = ({ data, data_
   data = data.slice(0, 30);
   data_min = data_min.slice(0, 30);
   data_max = data_max.slice(0, 30);
-  console.log(firstHour)
+
   // Prepare labels for each data point
   let labels = data.map((_, index) => {
     const date = new Date(baseDate.getTime());
