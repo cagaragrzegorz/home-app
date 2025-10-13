@@ -182,7 +182,6 @@ const TramSchedule: React.FC = () => {
                                                                 let color = 'inherit';
                                                                 let pulseClass = '';
                                                                 if (timetable.isInEffect){
-                                                                    console.log('${hour}-${minuteStr}: ', `${hour}-${minute}`, `${nextDepartureTime?.getHours()}-${nextDepartureTime?.getMinutes()}`);
                                                                     if (`${hour}-${minute}` === `${nextDepartureTime?.getHours()}-${nextDepartureTime?.getMinutes()}`) {
                                                                         color = 'green';
                                                                         pulseClass = 'pulse';
