@@ -128,7 +128,7 @@ const TramSchedule: React.FC = () => {
                         </Spinner>
                     ) : schedule ? (
                         <>
-                            <Card.Title style={{textAlign: "center"}}>Przystanek: Mały Płaszów (id: {schedule.departureId.stopId})
+                            <Card.Title style={{textAlign: "center"}}>Linia: 20 - Przystanek: Mały Płaszów (id: {schedule.departureId.stopId})
                             </Card.Title>
                             <Card.Subtitle className="mb-2 text-muted">
                                 Operator: {schedule.carrierDescription.namePl}
