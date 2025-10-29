@@ -3,8 +3,8 @@ import {Button, Modal, Form, Container, Row} from "react-bootstrap";
 import {BrushCleaning, CalendarPlus, Eraser, Plus, User} from "lucide-react";
 import {toast, ToastContainer} from "react-toastify";
 import './DutyTable.css';
+import {Weekday} from "../../types/types";
 
-type Weekday = 'Poniedziałek' | 'Wtorek' | 'Środa' | 'Czwartek' | 'Piątek' | 'Sobota' | 'Niedziela';
 type Duty = {
     [key: string]: string[];
 };
