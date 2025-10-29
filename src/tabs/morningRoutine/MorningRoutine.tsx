@@ -274,7 +274,7 @@ const listGroupItemStyle = (isActive: boolean, isLastStage: boolean): CSSPropert
 const OverlayContainer = styled(Col)`
     position: absolute;
     inset: 0px;
-    background-color: rgba(136, 136, 136, 0.59);
+    background-color: rgba(136, 136, 136, 0.8);
     z-index: 10;
     border-radius: 8px;
     font-weight: 600;
@@ -288,6 +288,7 @@ const OverlayContent = styled(Col)`
     display: flex;
     justify-content: center;
     align-items: center;
+    text-shadow: 2px 3px 12px #0a0a0a;
 `;
 
 const ProgressBarContainer = styled.div`
