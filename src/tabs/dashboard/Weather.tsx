@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import './Dashboard.css';
+import './Weather.css';
 import {ApiError} from "./types";
 import axios, {AxiosError, AxiosResponse} from "axios";
 import {fetchAvailableMeteograms, postUM460Meteograms} from "../../api/meteoClient";
@@ -11,7 +11,7 @@ import {Spinner} from 'react-bootstrap/esm';
 
 const FETCH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-const Dashboard: React.FC = () => {
+const Weather: React.FC = () => {
     const [data, setData] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ApiError | null>(null);
@@ -243,4 +243,4 @@ const Dashboard: React.FC = () => {
         ;
 };
 
-export default Dashboard;
+export default Weather;

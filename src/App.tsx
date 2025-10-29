@@ -2,7 +2,7 @@ import "./App.css";
 import React, {FC} from "react";
 import {Col, Container, Tab, Tabs} from "react-bootstrap";
 import {AlarmClock, BrushCleaning, House, ThermometerSun, TramFront} from "lucide-react";
-import Dashboard from "./tabs/dashboard/Dashboard";
+import Weather from "./tabs/dashboard/Weather";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
@@ -20,7 +20,7 @@ export const App: FC = () => (
                           <Home/>
                       </Tab>
                       <Tab eventKey="dashboard" title={<ThermometerSun color="white"/> }>
-                          <Dashboard/>
+                          <Weather/>
                       </Tab>
                       <Tab eventKey="trams" title={<TramFront color="white"/> }>
                           <TramSchedule/>
