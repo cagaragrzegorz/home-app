@@ -2,7 +2,7 @@ import "./App.css";
 import React, {FC} from "react";
 import {Col, Container, Tab, Tabs} from "react-bootstrap";
 import {AlarmClock, BrushCleaning, House, ThermometerSun, TramFront} from "lucide-react";
-import Weather from "./tabs/dashboard/Weather";
+import Weather from "./tabs/weather/Weather";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
