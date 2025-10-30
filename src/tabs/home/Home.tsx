@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import {Weekday} from "../../types/types";
+import {Col, Container, Row} from "react-bootstrap";
 
 export const Home: React.FC = () => {
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -39,20 +40,20 @@ export const Home: React.FC = () => {
     const dayOfWeek = currentTime.getDay();
 
     return (
-        <ClockWrapper>
-            <Clock>
-                <div style={{margin: '-20px'}}>
+        <Container>
+            <ClockWrapper>
+                <Clock>
                     <ClockSegment>{hours}</ClockSegment>
                     <ClockSeparator>:</ClockSeparator>
-                    <ClockSegment >{minutes}</ClockSegment>
-                    <ClockSeparator >:</ClockSeparator>
-                    <ClockSegment >{seconds}</ClockSegment>
-                </div>
-                <div style={{fontSize: 38}}>
-                    <ClockSegment>{day}-{month}-{year} - {daysOfWeek[dayOfWeek].toUpperCase()}</ClockSegment>
-                </div>
-            </Clock>
-        </ClockWrapper>
+                    <ClockSegment>{minutes}</ClockSegment>
+                    <ClockSeparator>:</ClockSeparator>
+                    <ClockSegment>{seconds}</ClockSegment>
+                    <div style={{fontSize: '2.5rem'}}>
+                        <ClockSegment>{day}-{month}-{year} - {daysOfWeek[dayOfWeek].toUpperCase()}</ClockSegment>
+                    </div>
+                </Clock>
+            </ClockWrapper>
+        </Container>
     );
 };
 
@@ -62,15 +63,17 @@ const ClockWrapper = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 555px;
+    width: 100%;
 `
 const Clock = styled.div`
     text-shadow: 4px 5px 4px rgba(0, 0, 0, 0.3);
     font-weight: 700;
-    font-size: 5rem;
+    font-size: 4.5rem;
     color: white;
-    padding: 20px 35px;
     letter-spacing: 1px;
+    @media (max-width: 555px) {
+        font-size: 3.5rem;
+    }
 `
 const ClockSegment = styled.span`
     display: inline-block;
