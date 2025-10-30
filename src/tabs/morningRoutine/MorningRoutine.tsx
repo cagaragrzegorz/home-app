@@ -175,13 +175,19 @@ export const MorningRoutine: React.FC = () => {
         setIsAfterRoutine(false);
         setIsRoutineActive(true);
         setDemoMode(true);
+        setIsStageTimeCalculated(false)
+        setCurrentStageIndex(0)
     }
 
     const initiateStandardRoutine = () => {
         setStages(initialStages);
         setRoutineStartTime(initialRoutineStartTime)
-        setCurrentStageIndex(9)
+        setCurrentStageIndex(99)
         setDemoMode(false);
+        setIsStageTimeCalculated(false)
+        setIsBeforeRoutine(false);
+        setIsAfterRoutine(false);
+        setIsRoutineActive(false);
     }
 
     return (
