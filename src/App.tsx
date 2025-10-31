@@ -43,7 +43,8 @@ export const App: FC = () => {
 
     return (
         <div className="app">
-            <Container style={{height: '100vh'}} {...handlers}>
+            {/*<Container style={{height: '100vh'}} {...handlers}>*/}
+            <Container style={{height: '100vh'}}>
                 <Tabs
                     justify
                     activeKey={tab}
