@@ -74,7 +74,7 @@ const Weather: React.FC = () => {
 
     // @ts-ignore
     return (
-        <div className="dashboard-container">
+        <div className="weather-container">
             {/* Loading State */}
             {isLoading && <div className="kids-clock-wrapper">
                 <Spinner animation="border" role="status"

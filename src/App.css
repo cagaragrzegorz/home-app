@@ -6,17 +6,26 @@ body {
 .app {
   text-align: center;
 }
+
 .nav-item {
   margin: 5px !important;
   font-size: 24px;
   font-weight: bold;
 }
+
 .nav-link {
   color: white !important;
-  /*background-color: #669eec !important;*/
   border-radius: var(--bs-nav-pills-border-radius);
 }
 
 .nav-link.active {
   background-color: var(--bs-nav-pills-link-active-bg) !important;
 }
+
+/*.nav-link.selected {*/
+/*  border-color: white !important;*/
+/*}*/
+
+/*.nav-link:hover {*/
+/*  border-color: #949aa7 !important;*/
+/*}*/
