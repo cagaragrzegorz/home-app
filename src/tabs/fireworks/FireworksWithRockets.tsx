@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 
-const FireworksWithRocketsSidekickVersion: React.FC = () => {
+const FireworksWithRockets: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
@@ -197,4 +197,4 @@ const FireworksWithRocketsSidekickVersion: React.FC = () => {
     return <canvas ref={canvasRef} style={{ display: 'block', position: 'fixed', bottom: 0, left: 0, zIndex: 9999 }} />;
 };
 
-export default FireworksWithRocketsSidekickVersion;
+export default FireworksWithRockets;
