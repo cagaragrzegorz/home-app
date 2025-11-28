@@ -2,9 +2,9 @@ import apiClient from "./apiClient";
 import {AvailableMeteorgams} from "./types";
 import axios from "axios";
 
-export const fetchAvailableMeteograms = async () => {
+export const fetchAvailableMeteograms = async (): Promise<AvailableMeteorgams> => {
     const response = await apiClient.get<AvailableMeteorgams>('https://devmgramapi.meteo.pl/meteorograms/available');
-    return response.data;
+    return response.data as AvailableMeteorgams;
 };
 
 export const postUM460Meteograms = async (latestMeteogram: number) => {
