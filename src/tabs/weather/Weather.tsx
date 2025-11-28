@@ -1,12 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './Weather.css';
 import {ApiError} from "./types";
-import axios, {AxiosError, AxiosResponse} from "axios";
+import axios, {AxiosError} from "axios";
 import {fetchAvailableMeteograms, postUM460Meteograms} from "../../api/meteoClient";
 import {AvailableMeteorgams} from "../../api/types";
 import {ChevronDown, ChevronUp} from "lucide-react";
 import TemperatureLineGraph from "../../components/TemperatureLineGraph";
 import {Spinner} from 'react-bootstrap/esm';
+import {Container, Row} from "react-bootstrap";
 
 
 const FETCH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -17,6 +18,7 @@ const Weather: React.FC = () => {
     const [error, setError] = useState<ApiError | null>(null);
     const [firstHour, setFirstHour] = useState<number>(0);
     const [advMetric, setAdvMetric] = useState<boolean>(false);
+    const [orientationKey, setOrientationKey] = useState<number>(0);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -72,24 +74,36 @@ const Weather: React.FC = () => {
         };
     }, [fetchData]);
 
+    const handleOrientationChange = useCallback(() => {
+        setOrientationKey((prevKey) => prevKey + 1); // Increment key to force rerender
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('resize', handleOrientationChange);
+        return () => {
+            window.removeEventListener('resize', handleOrientationChange);
+        };
+    }, [handleOrientationChange]);
+
     // @ts-ignore
     return (
-        <div className="weather-container">
+        <Container className="weather-container">
             {/* Loading State */}
             {isLoading && <div className="kids-clock-wrapper">
                 <Spinner animation="border" role="status"
                          variant="light"/>
             </div>}
 
-                {/* Error State */}
-                {error && !isLoading && <p style={{color: 'red'}}>Error: {error.message}</p>}
+            {/* Error State */}
+            {error && !isLoading && <p style={{color: 'red'}}>Error: {error.message}</p>}
 
             {/* Success State */}
             {data && !isLoading && !error && (
-                <div className="info-card">
+                <Row className="info-card">
                     {data && (
-                        <div style={{ background: "#222", padding: 16, borderRadius: 8, marginBottom: 24 }}>
-                            <TemperatureLineGraph data={data.airtmp_point.data}
+                        <div style={{background: "#222", padding: 16, borderRadius: 8, marginBottom: 24}}>
+                            <TemperatureLineGraph key={orientationKey}
+                                                  data={data.airtmp_point.data}
                                                   data_max={data.airtmp_max.data}
                                                   data_min={data.airtmp_min.data}
                                                   firstHour={firstHour}
@@ -150,8 +164,10 @@ const Weather: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                    <div onClick={()=>{setAdvMetric(!advMetric)}}>{advMetric ? <ChevronDown color="white"/>:<ChevronUp color="white"/>}</div>
-                    {advMetric ?  (<>
+                    <div onClick={() => {
+                        setAdvMetric(!advMetric)
+                    }}>{advMetric ? <ChevronDown color="white"/> : <ChevronUp color="white"/>}</div>
+                    {advMetric &&  (<>
                             <div className="card-title">Ciśnienie atmosferyczne (hPa)</div>
                             <div className="metric-container">
                                 <div className="metric-item" style={{paddingLeft: '10px'}}>
@@ -228,9 +244,9 @@ const Weather: React.FC = () => {
                                 ))}
                             </div>
                         </>
-                    ) : <div/>}
+                    )}
 
-                </div>
+                </Row>
             )}
 
             {/* Initial State (before first load or if first load fails instantly) */}
@@ -238,9 +254,8 @@ const Weather: React.FC = () => {
                 <p>No data loaded yet.</p>
             )}
 
-        </div>
-    )
-        ;
+        </Container>
+    );
 };
 
 export default Weather;
