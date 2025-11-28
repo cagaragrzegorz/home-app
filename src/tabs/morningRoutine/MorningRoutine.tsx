@@ -1,8 +1,9 @@
-import React, {CSSProperties, useEffect, useState} from 'react';
+import React, {CSSProperties, useContext, useEffect, useState} from 'react';
 import {Volume2, VolumeOff} from "lucide-react";
 import notificationSound from '../../assets/sounds/notification.mp3';
 import {Button, Col, Container, ListGroup, Row} from "react-bootstrap";
 import styled from "styled-components";
+import {AppContext} from "../../context/AppContext";
 
 type Stage = {
     name: string;
@@ -40,9 +41,12 @@ const initialRoutineStartTime: RoutineStartTime = {
 //     { name: '🚶🏻 🚗💨 Wychodzenie z mieszkania - 5 minut', durationInSeconds: 5*60 },
 // ];
 export const MorningRoutine: React.FC = () => {
+
+    const {appData} = useContext(AppContext);
+
     // morning routine stages
     const [stages, setStages] = useState<Stage[]>(initialStages)
-    const [currentStageIndex, setCurrentStageIndex] = useState(9);
+    const [currentStageIndex, setCurrentStageIndex] = useState(99);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [isBeforeRoutine, setIsBeforeRoutine] = useState(false);
     const [isRoutineActive, setIsRoutineActive] = useState(false);
@@ -51,8 +55,8 @@ export const MorningRoutine: React.FC = () => {
 
     const [isStageTimeCalculated, setIsStageTimeCalculated] = useState(false);
     const [timeLeft, setTimeLeft] = useState("00:00:00");
-    const todayTargetTime = new Date().setHours(routineStartTime.hour, routineStartTime.minute, routineStartTime.second);
-    const totalStageTime = stages.reduce((acc, stage) => acc + stage.durationInSeconds, 0);
+    const [todayTargetTime, setTodayTargetTime] = useState<number>(new Date().setHours(routineStartTime.hour, routineStartTime.minute, routineStartTime.second));
+    const [totalStageTime, setTotalStageTime] = useState<number>(stages.reduce((acc, stage) => acc + stage.durationInSeconds, 0));
 
     const [demoMode, setDemoMode] = useState<boolean>(false);
     // audio
@@ -62,6 +66,69 @@ export const MorningRoutine: React.FC = () => {
         audioElement.controls = true;
         return audioElement;
     });
+
+    // new implementation start
+    useEffect(() => {
+        if (appData.timestamp < todayTargetTime) {
+            setIsBeforeRoutine(true);
+        } else if (appData.timestamp >= todayTargetTime && appData.timestamp <= (todayTargetTime + totalStageTime * 1000)) {
+            setIsRoutineActive(true);
+        } else {
+            setIsAfterRoutine(true);
+            setTimeLeft("00:00:00")
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isBeforeRoutine && appData.timestamp < todayTargetTime) {
+            setIsBeforeRoutine(true);
+        } else if (!isRoutineActive && appData.timestamp >= todayTargetTime && appData.timestamp <= (todayTargetTime + totalStageTime * 1000)) {
+            setIsBeforeRoutine(false);
+            setIsRoutineActive(true);
+        } else if (!isAfterRoutine && appData.timestamp > (todayTargetTime + totalStageTime * 1000)) {
+            setIsRoutineActive(false);
+            setIsAfterRoutine(true);
+            setTimeLeft("00:00:00")
+        }
+    }, [appData.timestamp]);
+
+    useEffect(() => {
+        if (!isRoutineActive) {
+            const remaining = isAfterRoutine ?
+                Math.abs((todayTargetTime + totalStageTime * 1000) - appData.timestamp)
+                : Math.abs(todayTargetTime - appData.timestamp);
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            const formatted = [
+                hours.toString().padStart(2, "0"),
+                minutes.toString().padStart(2, "0"),
+                seconds.toString().padStart(2, "0"),
+            ].join(":");
+            setTimeLeft(formatted);
+        } else if (isRoutineActive && !isStageTimeCalculated) {
+            const remaining = Math.abs(todayTargetTime - appData.timestamp);
+            calculateStageTime(Math.floor(remaining / 1000));
+        } else if (isRoutineActive && isStageTimeCalculated) {
+            const remaining = appData.timestamp - todayTargetTime;
+            setElapsedTime((prev) => {
+                if (currentStageIndex >= stages.length) return 0;
+                const currentDuration = getCurrentDuration(remaining);
+                if (currentDuration >= stages[currentStageIndex].durationInSeconds) {
+                    setCurrentStageIndex((prevIndex) => prevIndex + 1);
+                    if (!audioMuted) audio.play()
+                    return 0;
+                }
+                return currentDuration;
+            });
+        }
+    }, [appData.timestamp]);
+
+    useEffect(() => {
+        setTodayTargetTime(new Date().setHours(routineStartTime.hour, routineStartTime.minute, routineStartTime.second))
+        setTotalStageTime(stages.reduce((acc, stage) => acc + stage.durationInSeconds, 0));
+    }, [routineStartTime]);
 
     const calculateStageTime = (timeElapsed: number) => {
         let accumulatedTime = 0;
@@ -75,75 +142,16 @@ export const MorningRoutine: React.FC = () => {
                 break;
             }
         }
-
     }
 
-    //Countdown to routine start
-    useEffect(() => {
-        const clockInterval = setInterval(() => {
-            const target = new Date(todayTargetTime).getTime();
-            const targetPlusStages = new Date(new Date(todayTargetTime).getTime() + totalStageTime * 1000).getTime();
-            const now = new Date().getTime();
-            let remaining = target - now;
+    function getCurrentDuration(remaining: number) {
+        return Math.floor(remaining / 1000 - stages.slice(0, currentStageIndex).reduce((acc, stage) => acc + stage.durationInSeconds, 0));
+    }
 
-            if (remaining > 0) {
-                setIsBeforeRoutine(true);
-            } else if (remaining <= 0 && (remaining * (-1) <= (totalStageTime + 2) * 1000)) {
-                setIsBeforeRoutine(false);
-                setIsRoutineActive(true);
-                setTimeLeft("00:00:00");
-            } else {
-                setIsRoutineActive(false);
-                setIsAfterRoutine(true);
-                remaining = now - targetPlusStages;
-            }
-
-            if (isRoutineActive && !isStageTimeCalculated) {
-                calculateStageTime(Math.floor(Math.abs(remaining) / 1000));
-            } else if (isRoutineActive && isStageTimeCalculated) {
-                setElapsedTime((prev) => {
-                    if (currentStageIndex >= stages.length) return prev;
-                    const currentDuration = prev + 1;
-                    if (currentDuration >= stages[currentStageIndex].durationInSeconds) {
-                        setCurrentStageIndex((prevIndex) => prevIndex + 1);
-                        if (!audioMuted) audio.play()
-                        return 0;
-                    }
-                    return currentDuration;
-                });
-            }
-
-            if (isAfterRoutine) {
-                remaining = now - targetPlusStages;
-            }
-
-            const hours = Math.abs(Math.floor(remaining / (1000 * 60 * 60)));
-            const minutes = Math.abs(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)));
-            const seconds = Math.abs(Math.floor((remaining % (1000 * 60)) / 1000));
-
-            const formatted = [
-                hours.toString().padStart(2, "0"),
-                minutes.toString().padStart(2, "0"),
-                seconds.toString().padStart(2, "0"),
-            ].join(":");
-
-            setTimeLeft(formatted);
-        }, 1000);
-        return () => clearInterval(clockInterval);
-    }, [todayTargetTime]);
-
-    //start stage in proper state after reload
-    useEffect(() => {
-        if (isRoutineActive) {
-            setCurrentStageIndex(0);
-        }
-    }, [isRoutineActive]);
-
-
-    const getRemainingTime = (duration: number, elapsed: number) => {
-        const remaining = duration - elapsed;
-        const minutes = Math.floor(remaining / 60);
-        const seconds = remaining % 60;
+    const getRemainingTime = (duration: number, elapsed: number): string => {
+        const remaining: number = duration - elapsed;
+        const minutes: number = Math.floor(remaining / 60);
+        const seconds: number = remaining % 60;
         return `${minutes.toString().padStart(2, '0')} min ${seconds.toString().padStart(2, '0')} sek`;
     };
 
@@ -251,7 +259,7 @@ export const MorningRoutine: React.FC = () => {
                                     )}
                                 </Col>
                                 <ProgressBarContainer>
-                                    <ProgressBarFiller progress={progress} isActive={isActive}/>
+                                    <ProgressBarFiller $progress={progress} $isActive={isActive}/>
                                 </ProgressBarContainer>
                             </ListGroup.Item>
                         );
@@ -304,10 +312,9 @@ const ProgressBarContainer = styled.div`
     overflow: hidden;
 `;
 
-const ProgressBarFiller = styled.div<{ progress: number; isActive: boolean }>`
-    width: ${props => props.progress}%;
+const ProgressBarFiller = styled.div<{ $progress: number; $isActive: boolean }>`
+    width: ${props => props.$progress}%;
     height: 100%;
-    background-color: ${props => (props.isActive ? '#fff' : '#888')};
+    background-color: ${props => (props.$isActive ? '#fff' : '#888')};
     transition: width 1s linear;
 `;
-
