@@ -1,72 +1,83 @@
 import "./App.css";
-import React, {FC, useState} from "react";
-import {Container, Tab, Tabs} from "react-bootstrap";
+import React, {FC, useContext, useEffect, useState} from "react";
+import {Container, Row, Spinner, Tab, Tabs} from "react-bootstrap";
 import {AlarmClock, BrushCleaning, House, ThermometerSun, TramFront} from "lucide-react";
 import Weather from "./tabs/weather/Weather";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
 import TramSchedule from "./tabs/trams/TramSchedule";
-import {useSwipeable} from "react-swipeable";
-
-const config = {
-    delta: 50,                            // min distance(px) before a swipe starts
-    preventDefaultTouchmoveEvent: false,  // call e.preventDefault *See Details*
-    trackTouch: true,                     // track touch input
-    trackMouse: true,                    // track mouse input
-    rotationAngle: 0,                     // set a rotation angle
-}
-
-const tabs = ["home", "dashboard", "trams", "morning", "duties"];
+import {AppContext} from "./context/AppContext";
 
 export const App: FC = () => {
 
+    const [isLoading, setIsLoading] = useState(true);
     const [tab, setTab] = useState<string>('home');
+    const {setAppData} = useContext(AppContext);
 
-    const handlers = useSwipeable({
-        onSwiped: (eventData) => {
-            if(eventData.dir==="Right") {
-                setTab(prevState => {
-                    const currentIndex = tabs.indexOf(prevState);
-                    const newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-                    return tabs[newIndex];
-                });
-            }
-            else if(eventData.dir==="Left") {
-                setTab(prevState => {
-                    const currentIndex = tabs.indexOf(prevState);
-                    const newIndex = (currentIndex + 1) % tabs.length;
-                    return tabs[newIndex];
-                });
-            }
-        }, ...config, });
+    useEffect(() => {
+        const activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            setTab(activeTab)
+        }
+        setIsLoading(false)
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('activeTab', tab);
+    }, [tab]);
+
+    useEffect(() => {
+        const timerId = setInterval(() => {
+            setAppData(prevState => ({
+                ...prevState,
+                timestamp: Date.now()
+            }));
+        }, 1000);
+
+        return () => {
+            clearInterval(timerId);
+        };
+    }, []);
 
     return (
         <div className="app">
             {/*<Container style={{height: '100vh'}} {...handlers}>*/}
             <Container style={{height: '100vh'}}>
+                {isLoading && (
+                    <Row style={{
+                        backgroundColor: "#949aa7",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 999,
+                        height: "100%",
+                        width: "100%",
+                    }}>
+                        <Spinner variant="light"/>
+                    </Row>
+                )}
                 <Tabs
                     justify
                     activeKey={tab}
                     onSelect={(key) => { if(key) setTab(key)}}
                 >
                     <Tab eventKey="home" title={<House color="white"/>}>
-                        <Home/>
+                        {tab === "home" && <Home />}
                     </Tab>
-                    <Tab eventKey="dashboard" title={<ThermometerSun color="white"/>}>
-                        <Weather/>
+                    <Tab eventKey="weather" title={<ThermometerSun color="white"/>}>
+                        {tab === "weather" && <Weather />}
                     </Tab>
                     <Tab eventKey="trams" title={<TramFront color="white"/>}>
-                        <TramSchedule/>
+                        {tab === "trams" && <TramSchedule />}
                     </Tab>
                     <Tab eventKey="morning" title={<AlarmClock color="white"/>}>
-                        <MorningRoutine/>
+                        {tab === "morning" && <MorningRoutine />}
                     </Tab>
                     <Tab eventKey="duties" title={<BrushCleaning color="white"/>}>
-                        <DutyTable/>
+                        {tab === "duties" && <DutyTable />}
                     </Tab>
                     {/*<Tab eventKey="fireworks" title={<Sparkles color="white"/> }>*/}
-                    {/*    <FireworksWithRocketsSidekickVersion />*/}
+                    {/*    {tab === "fireworks" && <FireworksWithRockets />}*/}
                     {/*</Tab>*/}
                 </Tabs>
             </Container>
