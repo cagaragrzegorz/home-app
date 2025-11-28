@@ -1,55 +1,62 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import styled from "styled-components";
-import {Weekday} from "../../types/types";
-import {Col, Container, Row} from "react-bootstrap";
+import {Container} from "react-bootstrap";
+import {AppContext} from "../../context/AppContext";
+
+const formatTimeUnit = (unit: number): string => {
+    return unit.toString().padStart(2, '0');
+};
 
 export const Home: React.FC = () => {
-    const [currentTime, setCurrentTime] = useState<Date>(new Date());
+    const {appData} = useContext(AppContext);
+    const [seconds, setSeconds] = useState<number>(0);
+    const [minutes, setMinutes] = useState<number>(0);
+    const [hours, setHours] = useState<number>(0);
+    const [day, setDay] = useState<number>(0);
+    const [month, setMonth] = useState<number>(0);
+    const [year, setYear] = useState<number>(0);
 
     useEffect(() => {
-        const timerId = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-
-        // Cleanup interval on component unmount
-        return () => {
-            clearInterval(timerId);
-        };
+        const currentTime = new Date(appData.timestamp)
+        setSeconds(currentTime.getSeconds());
+        setMinutes(currentTime.getMinutes());
+        setHours(currentTime.getHours());
+        setDay(currentTime.getDate());
+        setMonth(currentTime.getMonth() + 1);
+        setYear(currentTime.getFullYear());
     }, []);
 
-    const daysOfWeek: Weekday[] = [
-        "Niedziela",
-        "Poniedziałek",
-        "Wtorek",
-        "Środa",
-        "Czwartek",
-        "Piątek",
-        "Sobota"
-    ];
+    useEffect(() => {
+        const currentTime = new Date(appData.timestamp)
+        setSeconds(currentTime.getSeconds());
+        if (seconds == 59) {
+            setMinutes(currentTime.getMinutes());
+            if (minutes == 59) {
+                setHours(currentTime.getHours());
+                if (hours == 23) {
+                    setDay(currentTime.getDate());
+                    if (day >= new Date(year, month - 1, 0).getDate()) {
+                        setMonth(currentTime.getMonth() + 1);
+                        setYear(currentTime.getFullYear());
+                    }
+                }
+            }
+        }
+    }, [appData.timestamp]);
 
-    const formatTimeUnit = (unit: number): string => {
-        return unit.toString().padStart(2, '0');
-    };
-
-    const hours = formatTimeUnit(currentTime.getHours());
-    const minutes = formatTimeUnit(currentTime.getMinutes());
-    const seconds = formatTimeUnit(currentTime.getSeconds());
-    const day = formatTimeUnit(currentTime.getDate());
-    const month = formatTimeUnit(currentTime.getMonth() + 1);
-    const year = formatTimeUnit(currentTime.getFullYear());
-    const dayOfWeek = currentTime.getDay();
 
     return (
         <Container>
             <ClockWrapper>
                 <Clock>
-                    <ClockSegment>{hours}</ClockSegment>
+                    <ClockSegment>{formatTimeUnit(hours)}</ClockSegment>
                     <ClockSeparator>:</ClockSeparator>
-                    <ClockSegment>{minutes}</ClockSegment>
+                    <ClockSegment>{formatTimeUnit(minutes)}</ClockSegment>
                     <ClockSeparator>:</ClockSeparator>
-                    <ClockSegment>{seconds}</ClockSegment>
+                    <ClockSegment>{formatTimeUnit(seconds)}</ClockSegment>
                     <div style={{fontSize: '2.5rem'}}>
-                        <ClockSegment>{day}-{month}-{year} - {daysOfWeek[dayOfWeek].toUpperCase()}</ClockSegment>
+                        <ClockSegment>{formatTimeUnit(day)}-{formatTimeUnit(month)}-{formatTimeUnit(year)}
+                            - {appData.day.toUpperCase()}</ClockSegment>
                     </div>
                 </Clock>
             </ClockWrapper>
