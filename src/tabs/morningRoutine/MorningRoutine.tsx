@@ -1,8 +1,8 @@
-import React, {CSSProperties, useContext, useEffect, useState} from 'react';
+import React, {CSSProperties, useContext, useEffect, useState, useMemo} from 'react';
 import {Volume2, VolumeOff} from "lucide-react";
 import notificationSound from '../../assets/sounds/notification.mp3';
 import {Button, Col, Container, ListGroup, Row} from "react-bootstrap";
-import styled from "styled-components";
+import styled, {keyframes} from "styled-components";
 import {AppContext} from "../../context/AppContext";
 
 type Stage = {
@@ -43,6 +43,10 @@ const initialRoutineStartTime: RoutineStartTime = {
 export const MorningRoutine: React.FC = () => {
 
     const {appData} = useContext(AppContext);
+
+    const isFriday = useMemo(() => {
+        return appData.day === 'piątek';
+    }, [appData.day]);
 
     // morning routine stages
     const [stages, setStages] = useState<Stage[]>(initialStages)
@@ -112,7 +116,7 @@ export const MorningRoutine: React.FC = () => {
             calculateStageTime(Math.floor(remaining / 1000));
         } else if (isRoutineActive && isStageTimeCalculated) {
             const remaining = appData.timestamp - todayTargetTime;
-            setElapsedTime((prev) => {
+            setElapsedTime(() => {
                 if (currentStageIndex >= stages.length) return 0;
                 const currentDuration = getCurrentDuration(remaining);
                 if (currentDuration >= stages[currentStageIndex].durationInSeconds) {
@@ -252,6 +256,7 @@ export const MorningRoutine: React.FC = () => {
                                 <Col
                                     style={{fontSize: '1.2rem', marginBottom: '0.5rem', textAlign: 'left'}}>
                                     {stage.name}
+                                    {isFriday && (<TeddyEmoji>🧸&nbsp;&nbsp;</TeddyEmoji>)}
                                     {isActive && (
                                         <div style={{marginBottom: '0.5rem', textAlign: 'end', float: 'right'}}>
                                             Pozostało: {getRemainingTime(stage.durationInSeconds, elapsedTime)}
@@ -317,4 +322,22 @@ const ProgressBarFiller = styled.div<{ $progress: number; $isActive: boolean }>`
     height: 100%;
     background-color: ${props => (props.$isActive ? '#fff' : '#888')};
     transition: width 1s linear;
+`;
+
+const floatAnim = keyframes`
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+`;
+
+const TeddyEmoji = styled.span`
+    float: left;
+    animation: ${floatAnim} 2s ease-in-out infinite;
+    font-size: 1.6rem;
 `;
