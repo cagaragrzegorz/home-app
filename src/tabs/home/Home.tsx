@@ -8,7 +8,7 @@ const formatTimeUnit = (unit: number): string => {
 };
 
 export const Home: React.FC = () => {
-    const {appData} = useContext(AppContext);
+    const {appData, setAppData} = useContext(AppContext);
     const [seconds, setSeconds] = useState<number>(0);
     const [minutes, setMinutes] = useState<number>(0);
     const [hours, setHours] = useState<number>(0);
@@ -35,6 +35,10 @@ export const Home: React.FC = () => {
                 setHours(currentTime.getHours());
                 if (hours == 23) {
                     setDay(currentTime.getDate());
+                    setAppData(prev => ({
+                        ...prev,
+                        day: currentTime.toLocaleDateString('pl-PL', { weekday: 'long' })
+                    }));
                     if (day >= new Date(year, month - 1, 0).getDate()) {
                         setMonth(currentTime.getMonth() + 1);
                         setYear(currentTime.getFullYear());
