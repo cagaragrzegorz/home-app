@@ -2,12 +2,12 @@ import "./App.css";
 import React, {FC, useContext, useEffect, useState} from "react";
 import {Container, Row, Spinner, Tab, Tabs} from "react-bootstrap";
 import {AlarmClock, BrushCleaning, House, ThermometerSun, TramFront} from "lucide-react";
-import Weather from "./tabs/weather/Weather";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
 import TramSchedule from "./tabs/trams/TramSchedule";
 import {AppContext} from "./context/AppContext";
+import {Weather} from "./tabs/weather/Weather";
 
 export const App: FC = () => {
 
