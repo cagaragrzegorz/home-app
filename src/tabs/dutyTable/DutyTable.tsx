@@ -350,7 +350,7 @@ export const DutyTable: React.FC = () => {
                                         justifyContent: "space-between",
                                         alignItems: "center"
                                     }}>
-                                        <h5>{dutiesTable[dayAndKidPair.day][dayAndKidPair.kid].length === 0 ? "Dodaj": "Edytuj"} obowiązki</h5>
+                                        <h5>{dutiesTable[dayAndKidPair.day][dayAndKidPair.kid].length === 0 ? "Dodaj" : "Edytuj"} obowiązki</h5>
                                         <Button onClick={() => {
                                             setActiveDay(dayAndKidPair.day)
                                             setActiveKid(dayAndKidPair.kid)
