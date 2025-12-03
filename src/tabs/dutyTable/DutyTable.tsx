@@ -1,12 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Modal, Form, Container, Row, Card} from "react-bootstrap";
-import {BrushCleaning, CalendarPlus, Eraser, Plus, User} from "lucide-react";
+import {Button, Modal, Form, Container, Card} from "react-bootstrap";
+import {BrushCleaning, CalendarPlus, CalendarX2, Eraser, Plus, User} from "lucide-react";
 import {toast, ToastContainer} from "react-toastify";
 import {Weekday} from "../../types/types";
 import styled from "styled-components";
 
+type DutyStatus = {
+    name: string;
+    completed: boolean;
+}
 type Duty = {
-    [key: string]: string[];
+    [key: string]: DutyStatus[];
 };
 type DutiesByDay = {
     [day in Weekday]: Duty;
@@ -15,11 +19,11 @@ type DutiesByDay = {
 const initialKids: string[] = ['Tosia', 'Mania', 'Ola'];
 const weekdays: Weekday[] = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
 
-const dutiesByDay = weekdays.reduce((acc, day) => {
+const dutiesByDay: DutiesByDay = weekdays.reduce((acc, day) => {
     acc[day] = initialKids.reduce((kidAcc, kid) => {
         kidAcc[kid] = [];
         return kidAcc;
-    }, {} as Record<string, string[]>);
+    }, {} as Record<string, DutyStatus[]>);
     return acc;
 }, {} as DutiesByDay);
 
@@ -53,25 +57,59 @@ const initialDutiesList = [
 
 export const DutyTable: React.FC = () => {
     const today: Weekday = getCurrentWeekday();
-    const [dutiesTable, setDutiesTable] = useState<DutiesByDay>(() => {
-        const savedDuties = localStorage.getItem('dutiesTable');
-        return savedDuties ? JSON.parse(savedDuties) : dutiesByDay;
+    const [kids, setKids] = useState<string[]>(() => {
+        const savedKidList = localStorage.getItem('kids');
+        return savedKidList ? JSON.parse(savedKidList) : initialKids;
     });
     const [dutyList, setDutyList] = useState<string[]>(() => {
         const savedDutyList = localStorage.getItem('dutyList');
         return savedDutyList ? JSON.parse(savedDutyList) : initialDutiesList;
     });
-    const [kids, setKids] = useState<string[]>(() => {
-        const savedKidList = localStorage.getItem('kids');
-        return savedKidList ? JSON.parse(savedKidList) : initialKids;
+    const [dutiesTable, setDutiesTable] = useState<DutiesByDay>(() => {
+        const dutiesTable = localStorage.getItem('dutiesTable');
+        if (dutiesTable) {
+            const parsedDutiesTable = JSON.parse(dutiesTable);
+
+            // Check if it's of type Record<string, DutyStatus[]>
+            const isDutyStatusArray = Object.values(parsedDutiesTable).every((day: any) =>
+                typeof day === 'object' &&
+                Object.values(day).every((kid: any) =>
+                    Array.isArray(kid) &&
+                    kid.every((duty: any) =>
+                        typeof duty.name === 'string' &&
+                        typeof duty.completed === 'boolean'
+                    )
+                )
+            );
+
+            if (!isDutyStatusArray) {
+                let updatedDutiesTable: any = dutiesByDay
+                weekdays.forEach((day) => {
+                    kids.forEach((kid) => {
+                        const kidDuties = parsedDutiesTable[day][kid];
+                        if (Array.isArray(kidDuties) && kidDuties.length !== 0) {
+                            updatedDutiesTable[day][kid] = kidDuties.map((dutyName: string) => ({
+                                name: dutyName,
+                                completed: false
+                            }));
+                        }
+                    });
+                });
+                return updatedDutiesTable;
+            }
+        }
+        return dutiesTable ? JSON.parse(dutiesTable) : dutiesByDay;
     });
     const [showAddDutyModal, setShowAddDutyModal] = useState(false);
     const [showAddPersonModal, setShowAddPersonModal] = useState(false);
+    const [showCompleteDutyModal, setShowCompleteDutyModal] = useState(false);
+    const [showResetCompleteDutiesModal, setShowResetCompleteDutiesModal] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [activeKid, setActiveKid] = useState<string | null>(null);
     const [activeDay, setActiveDay] = useState<Weekday>(today);
     const [newDuty, setNewDuty] = useState<string>('');
     const [newKid, setNewKid] = useState<string>('');
+    const [dayAndKidPair, setDayAndKidPair] = useState<{ day: Weekday; kid: string }>({day: today, kid: 'Tosia'});
 
     useEffect(() => {
         localStorage.setItem('dutiesTable', JSON.stringify(dutiesTable));
@@ -83,18 +121,44 @@ export const DutyTable: React.FC = () => {
         localStorage.setItem('kids', JSON.stringify(kids));
     }, [kids]);
 
-    const handleDutyChange = (kid: string | null, day: Weekday, duty: string, isChecked: boolean) => {
+    const handleDutyAssignmentChange = (kid: string | null, day: Weekday, duty: string, isChecked: boolean) => {
         if (!kid) return;
         setDutiesTable((prevDuties) => {
             const updatedDuties = {...prevDuties};
             if (isChecked) {
-                updatedDuties[day][kid] = [...updatedDuties[day][kid], duty];
+                updatedDuties[day][kid] = [...updatedDuties[day][kid], {name: duty, completed: false}];
             } else {
-                updatedDuties[day][kid] = updatedDuties[day][kid].filter((d) => d !== duty);
+                updatedDuties[day][kid] = updatedDuties[day][kid].filter((dutyStatus) => dutyStatus.name !== duty);
             }
             return updatedDuties;
         });
     };
+
+    const handleDutyCompletionChange = (kid: string, day: Weekday, duty: string) => {
+        setDutiesTable((prevDuties) => {
+            const updatedDuties = {...prevDuties};
+            updatedDuties[day][kid] = updatedDuties[day][kid].map((dutyStatus) =>
+                dutyStatus.name === duty ? {...dutyStatus, completed: !dutyStatus.completed} : dutyStatus
+            );
+            return updatedDuties;
+        });
+    };
+
+    const handleCompletedDutiesReset = () => {
+        setDutiesTable((prevDuties) => {
+            const updatedDuties = {...prevDuties};
+            weekdays.forEach((day) => {
+                kids.forEach((kid) => {
+                    updatedDuties[day][kid] = updatedDuties[day][kid].map((dutyStatus) => ({
+                        ...dutyStatus,
+                        completed: false
+                    }));
+                });
+            });
+            return updatedDuties;
+        });
+        toast.success('Wykonane obowiązki zostały zresetowane!');
+    }
 
     const handleAddKid = (newKid: string) => {
         if (newKid.trim()) {
@@ -147,7 +211,7 @@ export const DutyTable: React.FC = () => {
             const updatedDutiesTable = {...prevDutiesTable};
             weekdays.forEach((day) => {
                 kids.forEach((kid) => {
-                    updatedDutiesTable[day][kid] = updatedDutiesTable[day][kid].filter((duty) => duty !== dutyToRemove);
+                    updatedDutiesTable[day][kid] = updatedDutiesTable[day][kid].filter((dutyStatus) => dutyStatus.name !== dutyToRemove);
                 });
             });
             return updatedDutiesTable;
@@ -171,8 +235,15 @@ export const DutyTable: React.FC = () => {
                         <Button onClick={() => setShowAddDutyModal(true)} style={{marginRight: '10px'}}>
                             <Plus size={24}/> <BrushCleaning size={24}/>
                         </Button>
-                        <Button onClick={() => setShowSettings(true)}>
+                        <Button onClick={() => {
+                            setActiveKid(null)
+                            setActiveDay(today)
+                            setShowSettings(true)
+                        }} style={{marginRight: '10px'}}>
                             <CalendarPlus size={24}/>
+                        </Button>
+                        <Button onClick={() => setShowResetCompleteDutiesModal(true)} style={{marginRight: '10px'}}>
+                            <CalendarX2 size={24}/>
                         </Button>
                     </div>
                     <StyledTable>
@@ -188,19 +259,115 @@ export const DutyTable: React.FC = () => {
                         {weekdays.map((day) => (
                             <tr key={day}>
                                 <StyledTD $backgroundColor="weekday" $isToday={day === today}>{day}</StyledTD>
-                                {kids.map((kid) => (
-                                    <StyledTD key={kid} $backgroundColor={kid} $isToday={day === today}>
-                                        <StyledUL>
-                                            {dutiesTable[day][kid].map((duty, index) => (
-                                                <StyledLI key={index}>{duty}</StyledLI>
-                                            ))}
-                                        </StyledUL>
-                                    </StyledTD>
-                                ))}
+                                {kids.map((kid) => {
+                                    const allCompleted = dutiesTable[day][kid].length !== 0 && dutiesTable[day][kid].every((dutyStatus) => dutyStatus.completed);
+                                    return (
+                                        <StyledTD
+                                            key={kid}
+                                            $backgroundColor={kid}
+                                            $isToday={day === today}
+                                            $allCompleted={allCompleted}
+                                            onClick={() => {
+                                                setShowCompleteDutyModal(true);
+                                                setDayAndKidPair({day, kid});
+                                            }}
+                                        >
+                                            <StyledUL>
+                                                {dutiesTable[day][kid].map((dutyStatus, index) => (
+                                                    <StyledLI key={index} $isCompleted={dutyStatus.completed}>
+                                                        {dutyStatus.name}
+                                                    </StyledLI>
+                                                ))}
+                                            </StyledUL>
+                                        </StyledTD>
+                                    );
+                                })}
                             </tr>
                         ))}
                         </tbody>
                     </StyledTable>
+
+                    {/*Reset Completed Duties Modal*/}
+                    <Modal show={showResetCompleteDutiesModal} onHide={() => setShowResetCompleteDutiesModal(false)}
+                           centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Obowiązki wykonane</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                                <h5>Resetuj wykonane obowiązki</h5>
+                                <Button
+                                    variant={"danger"}
+                                    onClick={() => {
+                                        handleCompletedDutiesReset()
+                                    }}
+                                    style={{float: 'right', marginBottom: '10px'}}
+                                ><Eraser/>
+                                </Button>
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowAddPersonModal(false)}>
+                                Close
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    {/*Complete Duties Modal*/}
+                    <Modal show={showCompleteDutyModal} onHide={() => setShowCompleteDutyModal(false)} centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Wykonaj zadanie</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="flex justify-content-center mb-3">
+                                <div style={{marginBottom: '1rem'}}>
+                                    {dutiesTable[dayAndKidPair.day][dayAndKidPair.kid].length === 0 ?
+                                        <div>{dayAndKidPair.kid} nie ma jeszcze przypisanych obowiązków
+                                            na {dayAndKidPair.day}.
+                                        </div> :
+
+                                        dutiesTable[dayAndKidPair.day][dayAndKidPair.kid].map((dutyStatus, index) => (
+                                            <Form.Group key={index} controlId={`checkbox-${dutyStatus.name}`} style={{
+                                                border: '1px solid #b3b3b3',
+                                                padding: '5px',
+                                                marginBottom: '4px',
+                                                borderRadius: '4px',
+                                                paddingLeft: '10px',
+                                            }} className="center-align">
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    label={dutyStatus.name}
+                                                    checked={dutyStatus.completed}
+                                                    onChange={(e) =>
+                                                        handleDutyCompletionChange(dayAndKidPair.kid, dayAndKidPair.day, dutyStatus.name)
+                                                    }
+                                                />
+                                            </Form.Group>
+                                        ))}
+                                    <hr style={{margin: '1rem 0'}}/>
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center"
+                                    }}>
+                                        <h5>{dutiesTable[dayAndKidPair.day][dayAndKidPair.kid].length === 0 ? "Dodaj": "Edytuj"} obowiązki</h5>
+                                        <Button onClick={() => {
+                                            setActiveDay(dayAndKidPair.day)
+                                            setActiveKid(dayAndKidPair.kid)
+                                            setShowSettings(true)
+                                        }}>
+                                            <CalendarPlus size={24}/>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowCompleteDutyModal(false)}>
+                                Close
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
 
                     {/*Add Person Modal*/}
                     <Modal show={showAddPersonModal} onHide={() => setShowAddPersonModal(false)} centered>
@@ -333,11 +500,11 @@ export const DutyTable: React.FC = () => {
                                         paddingLeft: '10px',
                                     }} className="center-align">
                                         <Form.Check
-                                            type="checkbox"
+                                            type="switch"
                                             label={duty}
-                                            checked={dutiesTable[activeDay][activeKid]?.includes(duty) ?? false}
+                                            checked={dutiesTable[activeDay][activeKid].map((dutyStatus) => dutyStatus.name)?.includes(duty) ?? false}
                                             onChange={(e) =>
-                                                handleDutyChange(activeKid, activeDay, duty, e.target.checked)
+                                                handleDutyAssignmentChange(activeKid, activeDay, duty, e.target.checked)
                                             }
                                         />
                                     </Form.Group>
@@ -380,7 +547,8 @@ const StyledTH = styled.th<{ $backgroundColor: string }>`
             case 'weekday':
                 return '#dddddd';
             case 'Tosia':
-                return '#f44d3c';
+                // return '#f44d3c';
+                return '#3cb4f4';
             case 'Mania':
                 return '#45d0a3';
             case 'Ola':
@@ -394,24 +562,34 @@ const StyledTH = styled.th<{ $backgroundColor: string }>`
     border-radius: 8px;
 `;
 
-const StyledTD = styled.td<{ $backgroundColor: string; $isToday?: boolean }>`
+const StyledTD = styled.td<{ $backgroundColor: string; $isToday?: boolean; $allCompleted?: boolean }>`
+    position: relative;
     background-color: ${props => {
+        const baseColor = '#d6bbe3';
         switch (props.$backgroundColor) {
             case 'weekday':
-                return props.$isToday ? '#cbd9ed': '#f2f2f2';
+                return props.$isToday ? baseColor : '#f2f2f2';
             case 'Tosia':
-                return props.$isToday ? '#cbd9ed': '#fbd7d2';
+                return props.$isToday ? baseColor : '#d1e5ff';
             case 'Mania':
-                return props.$isToday ? '#cbd9ed': '#c2fdf2';
+                return props.$isToday ? baseColor : '#c2fdf2';
             case 'Ola':
-                return props.$isToday ? '#cbd9ed': '#f6ebb8';
+                return props.$isToday ? baseColor : '#f6ebb8';
             default:
-                return props.$isToday ? '#cbd9ed': '#f2f2f2';
+                return props.$isToday ? baseColor : '#f2f2f2';
         }
     }};
-    font-weight: ${props => ( props.$isToday? 'bold' : 'normal')};
+    font-weight: ${props => (props.$isToday ? 'bold' : 'normal')};
     padding: 8px;
     border-radius: 8px;
+
+    &::after {
+        content: ${props => (props.$allCompleted ? "'🏅'" : "''")};
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 1.2rem;
+    }
 `;
 
 const StyledUL = styled.ul`
@@ -419,6 +597,7 @@ const StyledUL = styled.ul`
     padding-left: 0;
     list-style-type: none
 `;
-const StyledLI = styled.li`
-    text-decoration: underline;
+
+const StyledLI = styled.li<{ $isCompleted: boolean }>`
+    text-decoration: ${props => (props.$isCompleted ? 'line-through' : 'none')};
 `;
