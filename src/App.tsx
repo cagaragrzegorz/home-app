@@ -1,13 +1,14 @@
 import "./App.css";
 import React, {FC, useContext, useEffect, useState} from "react";
 import {Container, Row, Spinner, Tab, Tabs} from "react-bootstrap";
-import {AlarmClock, BrushCleaning, House, ThermometerSun, TramFront} from "lucide-react";
+import {AlarmClock, BrushCleaning, Calculator, House, ThermometerSun, TramFront} from "lucide-react";
 import {Home} from "./tabs/home/Home";
 import {MorningRoutine} from "./tabs/morningRoutine/MorningRoutine";
 import {DutyTable} from "./tabs/dutyTable/DutyTable";
 import TramSchedule from "./tabs/trams/TramSchedule";
 import {AppContext} from "./context/AppContext";
 import {Weather} from "./tabs/weather/Weather";
+import {MultiplicationTable} from "./tabs/multiplication/MultiplicationTable";
 
 export const App: FC = () => {
 
@@ -75,6 +76,9 @@ export const App: FC = () => {
                     </Tab>
                     <Tab eventKey="duties" title={<BrushCleaning color="white"/>}>
                         {tab === "duties" && <DutyTable />}
+                    </Tab>
+                    <Tab eventKey="multiplication" title={<Calculator color="white"/>}>
+                        {tab === "multiplication" && <MultiplicationTable />}
                     </Tab>
                     {/*<Tab eventKey="fireworks" title={<Sparkles color="white"/> }>*/}
                     {/*    {tab === "fireworks" && <FireworksWithRockets />}*/}
