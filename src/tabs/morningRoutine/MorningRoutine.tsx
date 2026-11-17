@@ -1,5 +1,5 @@
 import React, {CSSProperties, useContext, useEffect, useState, useMemo} from 'react';
-import {Volume2, VolumeOff} from "lucide-react";
+import {ArrowDown, ArrowUp, Car, TramFront,  Volume2, VolumeOff} from "lucide-react";
 import notificationSound from '../../assets/sounds/notification.mp3';
 import {Button, Col, Container, ListGroup, Row} from "react-bootstrap";
 import styled, {keyframes} from "styled-components";
@@ -30,6 +30,15 @@ const initialRoutineStartTime: RoutineStartTime = {
     minute: 30,
     second: 0,
 };
+
+const carRoutineStartTime: RoutineStartTime = {hour: 6, minute: 30, second: 0};
+const tramRoutineStartTime: RoutineStartTime = {hour: 6, minute: 20, second: 0};
+
+const formatRoutineStartTime = (time: RoutineStartTime): string =>
+    `${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+
+const isSameStartTime = (a: RoutineStartTime, b: RoutineStartTime): boolean =>
+    a.hour === b.hour && a.minute === b.minute && a.second === b.second;
 
 // const stages: Stage[] = [
 //     { name: '⏰ 🥱 Wstawanie - 5 minut', durationInSeconds: 5*60 },
@@ -202,9 +211,67 @@ export const MorningRoutine: React.FC = () => {
         setIsRoutineActive(false);
     }
 
+    const changeRoutineStartTime = (newStartTime: RoutineStartTime) => {
+        setRoutineStartTime(newStartTime);
+        // reset routine state so it is re-evaluated against the new start time
+        setCurrentStageIndex(99);
+        setElapsedTime(0);
+        setIsStageTimeCalculated(false);
+        setIsBeforeRoutine(false);
+        setIsAfterRoutine(false);
+        setIsRoutineActive(false);
+    }
+
+    const shiftRoutineStartTime = (minutesDelta: number) => {
+        const minutesInDay = 24 * 60;
+        const totalMinutes = (routineStartTime.hour * 60 + routineStartTime.minute + minutesDelta + minutesInDay) % minutesInDay;
+        changeRoutineStartTime({
+            hour: Math.floor(totalMinutes / 60),
+            minute: totalMinutes % 60,
+            second: routineStartTime.second,
+        });
+    }
+
     return (
         <Container style={{padding: 0, fontFamily: 'Arial, sans-serif'}}>
             <div className="flex-row-reverse mb-2" style={{textAlign: 'right'}}>
+                <Button
+                    variant={isSameStartTime(routineStartTime, carRoutineStartTime) ? 'primary' : 'outline-primary'}
+                    onClick={() => changeRoutineStartTime(carRoutineStartTime)}
+                    disabled={demoMode}
+                    style={{marginRight: '10px'}}
+                >
+                    <Car color="white"/>
+                </Button>
+                <Button
+                    variant={isSameStartTime(routineStartTime, tramRoutineStartTime) ? 'primary' : 'outline-primary'}
+                    onClick={() => changeRoutineStartTime(tramRoutineStartTime)}
+                    disabled={demoMode}
+                    style={{marginRight: '10px'}}
+                >
+                    <TramFront color="white"/>
+                </Button>
+                <strong style={{marginRight: '10px', fontSize: '1.5rem', verticalAlign: 'middle', color: 'white'}}>
+                    {formatRoutineStartTime(routineStartTime)}
+                </strong>
+                <Button
+                    variant="primary"
+                    onClick={() => shiftRoutineStartTime(-1)}
+                    disabled={demoMode}
+                    style={{marginRight: '5px'}}
+                    title="1 minutę wcześniej"
+                >
+                    <ArrowUp color="white"/>
+                </Button>
+                <Button
+                    variant="primary"
+                    onClick={() => shiftRoutineStartTime(1)}
+                    disabled={demoMode}
+                    style={{marginRight: '10px'}}
+                    title="1 minutę później"
+                >
+                    <ArrowDown color="white"/>
+                </Button>
                 <Button
                     onClick={toggleSoundMute}
                     style={{
